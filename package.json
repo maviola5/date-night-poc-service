@@ -1,0 +1,33 @@
+{
+  "name": "date-night-poc-service",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "dev": "ts-node-dev ./src/index.ts",
+    "start": "ts-node tsconfig.json --transpile-only ./src/index.ts"
+  },
+  "engines": {
+    "node": ">= 16.0.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@koa/router": "^10.1.1",
+    "@types/koa-router": "^7.4.4",
+    "axios": "^0.25.0",
+    "dotenv": "^14.2.0",
+    "firebase-admin": "^10.0.2",
+    "koa": "^2.13.4",
+    "koa-bodyparser": "^4.3.0",
+    "ts-node": "^10.4.0",
+    "winston": "^3.4.0"
+  },
+  "devDependencies": {
+    "@types/koa__router": "^8.0.11",
+    "@types/koa-bodyparser": "^4.3.5",
+    "ts-node-dev": "^1.1.8"
+  }
+}
