@@ -1,6 +1,6 @@
 import { config } from 'dotenv';
 config();
-export const environement = {
+export const environment = {
   local: process.env.LOCAL,
   tmdb: {
     baseURL: process.env.TMDB_BASE_URL,

@@ -1,20 +1,17 @@
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 import { requestLogger } from './middleware/request-logger';
-import trendingRouter from './routes/trending';
-import moviesRouter from './routes/movies';
-import showsRouter from './routes/shows';
+import showsRouter from './routes/show-routes';
 import { errorHandler } from './middleware/error-handler';
+import { validateJwt } from './middleware/validate-jwt';
 
 const app = new Koa();
 
 app.use(requestLogger());
-app.use(bodyParser());
 app.use(errorHandler());
-app.use(trendingRouter.routes());
-app.use(trendingRouter.allowedMethods());
-app.use(moviesRouter.routes());
-app.use(moviesRouter.allowedMethods());
+app.use(validateJwt());
+app.use(bodyParser());
+
 app.use(showsRouter.routes());
 app.use(showsRouter.allowedMethods());
 

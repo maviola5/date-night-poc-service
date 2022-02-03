@@ -1,5 +1,5 @@
 import { Context, Next } from 'koa';
-import { logger } from '../utilities/logger';
+import { logger } from '../utils/logger';
 
 export const requestLogger = () => async (ctx: Context, next: Next) => {
   const start = Date.now();
