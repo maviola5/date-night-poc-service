@@ -1,14 +1,11 @@
 import { Context, Next } from 'koa';
-import { logger } from '../utils/logger';
+import { log } from '../utils/logger';
 
 export const errorHandler = () => async (ctx: Context, next: Next) => {
   try {
     await next();
   } catch (err) {
-    logger.info({
-      message: 'there was an error',
-      error: err,
-    });
+    log('There was an error', { error: err });
     ctx.status = (err as any).status || 500;
     ctx.body =
       (err as any).status !== 500

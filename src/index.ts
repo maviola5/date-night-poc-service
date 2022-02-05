@@ -1,3 +1,4 @@
+import './environment';
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 import { requestLogger } from './middleware/request-logger';

@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase-admin/app';
-import { getFirestore, QuerySnapshot } from 'firebase-admin/firestore';
+import { getFirestore } from 'firebase-admin/firestore';
 import { Friend } from '../models/friend';
 import { ShowPreferences } from '../models/show-preferences';
 
@@ -38,7 +38,6 @@ export const getShowPreferencesByIds = async (ids: string[]) => {
 };
 
 export const saveShowPreferences = async (data: ShowPreferences) => {
-  console.log(data);
   await db.collection('showPreferences').doc(data.id).set(data);
 };
 
@@ -56,7 +55,6 @@ export const getUsersByName = async (name: string) => {
 };
 
 export const saveFriend = async (data: Friend) => {
-  console.log(data);
   await db.collection('friends').doc(data.id).set(data);
 };
 
@@ -69,7 +67,6 @@ export const getFriendByIdAndUserId = async (
     .where('userId', '==', userId)
     .where('friendId', '==', friendId)
     .get();
-  console.log(doc);
   const friends = doc.docs.map((doc) => doc.data());
   return friends[0] as Friend;
 };
@@ -77,7 +74,10 @@ export const getFriendByIdAndUserId = async (
 export const getFriends = async (userId: string) => {
   const friendRef = db.collection('friends');
   const doc = await friendRef.where('userId', '==', userId).get();
-  console.log(doc);
   const friends = doc.docs.map((doc) => doc.data());
   return friends as Friend[];
+};
+
+export const removeFriend = async (id: string) => {
+  await db.collection('friends').doc(id).delete();
 };

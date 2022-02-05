@@ -1,13 +1,18 @@
 import { Context, Next } from 'koa';
-import { logger } from '../utils/logger';
+import { log } from '../utils/logger';
 
 export const requestLogger = () => async (ctx: Context, next: Next) => {
   const start = Date.now();
+  const { method, url } = ctx;
   try {
-    logger.info(`Request Start - ${ctx.method} ${ctx.url}`);
+    log(`Request Start - ${method} ${url}`, { method, url });
     await next();
   } finally {
     const ms = Date.now() - start;
-    logger.info(`Request End - ${ctx.method} ${ctx.url} - Duration: ${ms}ms`);
+    log(`Request End - ${method} ${url} - Duration: ${ms}ms`, {
+      method,
+      url,
+      duration: ms,
+    });
   }
 };

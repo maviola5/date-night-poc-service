@@ -1,5 +1,5 @@
 import {
-  getShowById as tmdbGetShowById,
+  getShowById,
   getWatchProviders,
   getRecommended,
   getTrending as tmdbGetTrending,
@@ -14,23 +14,20 @@ import {
   getFriends,
 } from '../gateway/firebase';
 import { ShowPreferences } from '../models/show-preferences';
-import { logger } from '../utils/logger';
+import { log } from '../utils/logger';
 import { v4 as uuid } from 'uuid';
 import { shuffle } from '../utils/shuffle';
 import { Media } from '../models/tmdb';
-import { BadRequest } from '../middleware/error-handler';
+import { BadRequest, UnauthorizedRequest } from '../middleware/error-handler';
 
-export const getShowById = async (
+export const getShowPreferenceById = async (
   media: Media,
   showId: string,
   userId: string
 ) => {
-  logger.info({
-    message: 'Fetching show data',
-    metadata: { media, showId, userId },
-  });
+  log('Fetching show data', { media, showId, userId });
   const [show, providers, recommended] = await Promise.all([
-    tmdbGetShowById(media, showId),
+    getShowById(media, showId),
     getWatchProviders(media, showId),
     getRecommended(media, showId),
     getShowPreferencesByUserAndShow(userId, showId),
@@ -58,48 +55,29 @@ export const validateChanges = (changes: ShowPreferences) => {
 };
 
 export const saveShowPreferences = async (preferences: ShowPreferences) => {
-  logger.info({
-    message: 'Fetching show preferences.',
-    metadata: { showId: preferences.showId },
-  });
-
+  const { showId, userId } = preferences;
+  log('Fetching show preferences.', { showId, userId });
   const existing = await getShowPreferencesByUserAndShow(
     preferences.userId,
     preferences.showId
   );
-  console.log(existing);
   const preferencesId = existing?.id || uuid();
-
   const validatedChanges = validateChanges(preferences);
 
-  logger.info({
-    message: 'Saving show preferences.',
-    metadata: { showId: preferences.id },
-  });
+  log('Saving show preferences.', { preferencesId, showId, userId });
   await save({ ...validatedChanges, id: preferencesId });
 };
 
 export const getTrending = async (page: number) => {
-  logger.info({
-    message: 'Fetching trending movies & shows.',
-    metadata: {
-      page,
-    },
-  });
+  log('Fetching trending movies & shows.', { page });
   const [moviesResult, tvResults] = await Promise.all([
     tmdbGetTrending('movie', page),
     tmdbGetTrending('tv', page),
   ]);
-
   return {
     page: moviesResult.page,
     results: shuffle(moviesResult.results, tvResults.results),
   };
-};
-
-export const getShowsByUserId = async (userId: string) => {
-  const result = await getShowPreferencesByUserId(userId);
-  return result;
 };
 
 export const getUserList = async (name: string) => {
@@ -117,17 +95,9 @@ export interface AddFriendInput {
 
 export const addOrUpdateFriend = async (input: AddFriendInput) => {
   const { userId, friendId } = input;
-  logger.info({
-    message: 'Checking if friend exists.',
-    metadata: {
-      userId,
-      friendId,
-      input,
-    },
-  });
+  log('Checking if friend exists.', { userId, friendId, input });
   const result = await getFriendByIdAndUserId(userId, friendId);
   const data = { ...result, ...input, id: result?.id || uuid() };
-  console.log('Saving friend.', { ...data });
   await saveFriend(data);
   return data;
 };
@@ -135,4 +105,18 @@ export const addOrUpdateFriend = async (input: AddFriendInput) => {
 export const getFriendsList = async (userId: string) => {
   const result = await getFriends(userId);
   return result || [];
+};
+
+export const getShowPreferencesByFriendId = async (
+  userId: string,
+  friendId: string
+) => {
+  log('Checking if user is a friend', { userId, friendId });
+  const friend = await getFriendByIdAndUserId(userId, friendId);
+  if (friend) {
+    const result = await getShowPreferencesByUserId(friendId);
+    return result || [];
+  } else {
+    throw new UnauthorizedRequest('User is not a friend.');
+  }
 };
